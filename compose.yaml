@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+  app:
+    image: kigali-ptn-app
+    build:
+      context: .
+    container_name: kigali-ptn-app
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    restart: always
+    networks:
+      - kigali-ptn-app-network
+
+volumes:
+  inyagpt-vectorstore-data:
+
+networks:
+  kigali-ptn-app-network:
+    driver: bridge

@@ -1,26 +1,36 @@
 {
-  "name": "kigali-ptn",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.3"
-  },
-  "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.3"
-  }
+	"name": "kigali-ptn",
+	"version": "0.1.0",
+	"private": false,
+	"description": "Kigali PTN or Kigali Public Transport Navigator is a web application that helps people in Kigali to find the public transport routes, Bus stops, and tracking the buses in real-time. It also helps the bus drivers.",
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint"
+	},
+	"dependencies": {
+		"@emotion/cache": "^11.11.0",
+		"@emotion/react": "^11.11.3",
+		"@emotion/styled": "^11.11.0",
+		"@mui/icons-material": "^5.15.2",
+		"@mui/material": "^5.15.2",
+		"@mui/material-nextjs": "^5.15.0",
+		"@vis.gl/react-google-maps": "^0.9.0",
+		"dotenv": "^16.4.5",
+		"mongoose": "^8.3.2",
+		"next": "14.2.3",
+		"react": "^18",
+		"react-dom": "^18"
+	},
+	"devDependencies": {
+		"@types/node": "^20",
+		"@types/react": "^18",
+		"@types/react-dom": "^18",
+		"eslint": "^8",
+		"eslint-config-next": "14.2.3",
+		"postcss": "^8",
+		"tailwindcss": "^3.4.1",
+		"typescript": "^5"
+	}
 }
