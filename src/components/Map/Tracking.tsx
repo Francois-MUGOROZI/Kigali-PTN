@@ -1,6 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
+import {
+	AdvancedMarker,
+	Pin,
+	useMap,
+	useMapsLibrary,
+} from "@vis.gl/react-google-maps";
 import BusIcon from "@mui/icons-material/DirectionsBus";
 
 // Custom components
@@ -17,6 +22,19 @@ export default function Tracking({
 	route,
 	handleUpdateNextStop,
 }: Props) {
+	const map = useMap(); // Get the map instance
+	const routesLibrary = useMapsLibrary("routes"); // Get the routes library
+	const [directionsServices, setDirectionsServices] =
+		useState<google.maps.DirectionsService>();
+
+	useEffect(() => {
+		if (!map || !routesLibrary) {
+			return;
+		}
+
+		setDirectionsServices(new routesLibrary.DirectionsService());
+	}, [map, routesLibrary]);
+
 	const [busPosition, setBusPosition] = useState<{
 		lat: number;
 		lng: number;
@@ -57,7 +75,6 @@ export default function Tracking({
 					};
 
 					setBusPosition(newPositionData);
-
 					updateIndex++;
 				}
 
@@ -74,34 +91,47 @@ export default function Tracking({
 
 	useEffect(() => {
 		setTimeout(() => {
-			// Compute the distance between the bus and the next stop
-			if (nextStopIndex < route.waypoints.length) {
-				const distanceToNextStop =
-					google.maps.geometry.spherical.computeDistanceBetween(
-						{
-							lat: route.waypoints[nextStopIndex].lat,
-							lng: route.waypoints[nextStopIndex].lng,
-						},
-						busPosition
-					);
+			if (directionsServices) {
+				directionsServices
+					.route({
+						origin: busPosition,
+						destination: route.waypoints[nextStopIndex],
+						travelMode: google.maps.TravelMode.DRIVING,
+					})
+					.then((result) => {
+						if (result) {
+							const stopRouteInfo = result.routes[0];
+							const stopRoutePath = stopRouteInfo.legs.flatMap((leg) =>
+								leg.steps.flatMap((step) =>
+									google.maps.geometry.encoding.decodePath(
+										step.encoded_lat_lngs
+									)
+								)
+							);
+							const nextStopIndexInPath = stopRoutePath.findIndex(
+								(point) =>
+									google.maps.geometry.spherical.computeDistanceBetween(
+										route.waypoints[nextStopIndex],
+										point
+									) < 10
+							);
 
-				const durationToNextStop = distanceToNextStop / SPEAD;
+							const totalDistance =
+								google.maps.geometry.spherical.computeLength(stopRoutePath);
+							const totalDuration = totalDistance / SPEAD;
 
-				const nextStopInfo: NextStopInfo = {
-					name: route.waypoints[nextStopIndex].name,
-					distance: distanceToNextStop,
-					duration: durationToNextStop,
-				};
+							const nextStopInfo: NextStopInfo = {
+								name: route.waypoints[nextStopIndex].name,
+								distance: totalDistance,
+								duration: totalDuration,
+							};
+							handleUpdateNextStop(nextStopInfo);
 
-				handleUpdateNextStop(nextStopInfo);
-
-				if (distanceToNextStop < 10) {
-					if (nextStopIndex >= route.waypoints.length - 1) {
-						setNextStopIndex((prev) => prev - 1);
-					} else {
-						setNextStopIndex((prev) => prev + 1);
-					}
-				}
+							if (nextStopIndexInPath === 0) {
+								setNextStopIndex((prev) => prev + 1);
+							}
+						}
+					});
 			}
 		}, 5000);
 	}, [busPosition]);
